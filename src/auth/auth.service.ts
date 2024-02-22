@@ -1,10 +1,16 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as argon from 'argon2';
 
-import { LoginResponseDto, LoginHandleDto } from './dto';
+import { LoginResponseDto, LoginHandleDto, SignUpRequestDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
+import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +19,47 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginHandleDto): Promise<LoginResponseDto> {
+  async basicLogin(loginDto: BasicLoginRequestDto): Promise<LoginResponseDto> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: loginDto.email,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Wrong email or password');
+    }
+
+    if (!user.password) {
+      // User registered with Google
+      throw new BadRequestException('Wrong email or password');
+    }
+
+    // Check password
+    const passwordMatch = await argon.verify(user.password, loginDto.password);
+
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Wrong email or password');
+    }
+
+    // Generate tokens
+    const tokens = await this.generateTokens({
+      sub: user.id,
+      email: user.email,
+    });
+
+    return {
+      user: {
+        email: user.email,
+        name: user.name,
+        image: user.image,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async googleLogin(loginDto: LoginHandleDto): Promise<LoginResponseDto> {
     let user = await this.prismaService.user.findUnique({
       where: {
         email: loginDto.email,
@@ -23,10 +69,11 @@ export class AuthService {
     // Create new user if not exists
     if (!user) {
       try {
-        // Create new user
+        // Create new user (Google)
         user = await this.prismaService.user.create({
           data: {
             email: loginDto.email,
+            password: null,
             name: loginDto.name,
             image: loginDto.image,
           },
@@ -48,6 +95,45 @@ export class AuthService {
         email: user.email,
         name: user.name,
         image: user.image,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async signUp(signUpDto: SignUpRequestDto): Promise<LoginResponseDto> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: signUpDto.email,
+      },
+    });
+
+    if (user) {
+      throw new BadRequestException('Email already in use');
+    }
+
+    const hash = await argon.hash(signUpDto.password);
+
+    const newUser = await this.prismaService.user.create({
+      data: {
+        email: signUpDto.email,
+        password: hash,
+        name: signUpDto.name,
+        image: null,
+      },
+    });
+
+    // Generate tokens
+    const tokens = await this.generateTokens({
+      sub: newUser.id,
+      email: newUser.email,
+    });
+
+    return {
+      user: {
+        email: newUser.email,
+        name: newUser.name,
+        image: newUser.image,
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
