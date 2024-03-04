@@ -176,7 +176,7 @@ export class AuthService {
         id: payload.sub,
       },
       data: {
-        refreshToken: hash,
+        refresh_token: hash,
       },
     });
 
