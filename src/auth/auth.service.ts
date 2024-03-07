@@ -6,7 +6,12 @@ import {
 } from '@nestjs/common';
 import * as argon from 'argon2';
 
-import { LoginResponseDto, LoginHandleDto, SignUpRequestDto } from './dto';
+import {
+  LoginResponseDto,
+  LoginHandleDto,
+  SignUpRequestDto,
+  ChangePasswordDto,
+} from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
@@ -20,7 +25,7 @@ export class AuthService {
   ) {}
 
   async basicLogin(loginDto: BasicLoginRequestDto): Promise<LoginResponseDto> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.users.findUnique({
       where: {
         email: loginDto.email,
       },
@@ -46,6 +51,7 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return {
@@ -60,7 +66,7 @@ export class AuthService {
   }
 
   async googleLogin(loginDto: LoginHandleDto): Promise<LoginResponseDto> {
-    let user = await this.prismaService.user.findUnique({
+    let user = await this.prismaService.users.findUnique({
       where: {
         email: loginDto.email,
       },
@@ -70,7 +76,7 @@ export class AuthService {
     if (!user) {
       try {
         // Create new user (Google)
-        user = await this.prismaService.user.create({
+        user = await this.prismaService.users.create({
           data: {
             email: loginDto.email,
             password: null,
@@ -88,6 +94,7 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return {
@@ -102,7 +109,7 @@ export class AuthService {
   }
 
   async signUp(signUpDto: SignUpRequestDto): Promise<LoginResponseDto> {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.users.findUnique({
       where: {
         email: signUpDto.email,
       },
@@ -114,7 +121,7 @@ export class AuthService {
 
     const hash = await argon.hash(signUpDto.password);
 
-    const newUser = await this.prismaService.user.create({
+    const newUser = await this.prismaService.users.create({
       data: {
         email: signUpDto.email,
         password: hash,
@@ -127,6 +134,7 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: newUser.id,
       email: newUser.email,
+      role: newUser.role,
     });
 
     return {
@@ -140,8 +148,210 @@ export class AuthService {
     };
   }
 
-  async getJwtAccessToken(sub: number, email: string): Promise<string> {
-    const payload: ITokenPayload = { sub, email };
+  async logOut(userId: number) {
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Check if user is already logged out
+    if (!user.refresh_token) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    try {
+      // Update user's refresh token to null
+      await this.prismaService.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          refresh_token: null,
+        },
+      });
+
+      return {};
+    } catch (err) {
+      console.log('Error:', err);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async refresh(refreshToken: string, payload: ITokenPayload) {
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: payload.sub,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    // Check if user is already logged out
+    if (!user.refresh_token) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    // Compare refresh token
+    const isMatch = await argon.verify(user.refresh_token, refreshToken);
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return await this.generateTokens(payload);
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    // Find user
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    // Check if old password is the same as new password
+    if (dto.oldPassword === dto.newPassword) {
+      throw new BadRequestException(
+        'New password must be different from old password',
+      );
+    }
+
+    // Check old password
+    const isMatch = await argon.verify(user.password, dto.oldPassword);
+    if (!isMatch) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+
+    // Hash new password
+    const hash = await argon.hash(dto.newPassword);
+
+    // Update user password
+    try {
+      await this.prismaService.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: hash,
+        },
+      });
+
+      return {};
+    } catch (err) {
+      console.log('Error:', err);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  // async forgotPassword(email: string) {
+  //   // Find user
+  //   const user = await this.prismaService.users.findUnique({
+  //     where: {
+  //       email,
+  //     },
+  //   });
+
+  //   if (!user) {
+  //     throw new UnauthorizedException('Invalid email');
+  //   }
+
+  //   // Set the resetting password flag to true
+  //   await this.prismaService.users.update({
+  //     where: {
+  //       id: user.id,
+  //     },
+  //     data: {
+  //       reset_password: true,
+  //     },
+  //   });
+
+  //   // Generate token
+  //   const verificationToken = await this.getJwtVerificationToken(
+  //     user.id,
+  //     user.email,
+  //     user.role,
+  //   );
+
+  //   // Generate verification link
+  //   const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${verificationToken}`; // Replace with frontend url
+
+  //   // Send verification email with token
+  //   const templateData = {
+  //     fullname: user.first_name + ' ' + user.last_name,
+  //     link: verificationLink,
+  //   };
+
+  //   const userEmail = user.email;
+  //   const data: SendMailTemplateDto = {
+  //     toAddresses: [userEmail],
+  //     ccAddresses: [userEmail],
+  //     bccAddresses: [userEmail],
+  //     template: 'change_password_request',
+  //     templateData: JSON.stringify(templateData),
+  //   };
+
+  //   try {
+  //     await this.mailService.sendEmailTemplate(data);
+
+  //   return {};
+  // } catch (err) {
+  //   throw new InternalServerErrorException('Forgot password email failed to send');
+  // }
+  // }
+
+  // async resetPassword(userId: number, newPassword: string) {
+  //   // Find user
+  //   const user = await this.prismaService.users.findUnique({
+  //     where: {
+  //       id: userId,
+  //     },
+  //   });
+
+  //   if (!user) {
+  //     throw new UnauthorizedException('User not found');
+  //   }
+
+  //   if (user.reset_password == false) {
+  //     throw new UnauthorizedException(
+  //       'User has not requested for password reset',
+  //     );
+  //   }
+
+  //   // Hash password
+  //   const hash = await argon.hash(newPassword);
+
+  //   // Update user password
+  //   await this.prismaService.users.update({
+  //     where: {
+  //       id: userId,
+  //     },
+  //     data: {
+  //       password: hash,
+  //       reset_password: false,
+  //     },
+  //   });
+
+  //   return {};
+  // }
+
+  // Utils
+  async getJwtAccessToken(
+    sub: number,
+    email: string,
+    role: string,
+  ): Promise<string> {
+    const payload: ITokenPayload = { sub, email, role };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_AT_SECRET,
       expiresIn: process.env.JWT_AT_EXPIRES,
@@ -149,8 +359,12 @@ export class AuthService {
     return accessToken;
   }
 
-  async getJwtRefreshToken(sub: number, email: string): Promise<string> {
-    const payload: ITokenPayload = { sub, email };
+  async getJwtRefreshToken(
+    sub: number,
+    email: string,
+    role: string,
+  ): Promise<string> {
+    const payload: ITokenPayload = { sub, email, role };
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_RT_SECRET,
       expiresIn: process.env.JWT_RT_EXPIRES,
@@ -158,20 +372,35 @@ export class AuthService {
     return refreshToken;
   }
 
+  async getJwtVerificationToken(
+    sub: number,
+    email: string,
+    role: string,
+  ): Promise<string> {
+    const payload: ITokenPayload = { sub, email, role };
+    const verificationToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_VT_SECRET,
+      expiresIn: process.env.JWT_VT_EXPIRES,
+    });
+    return verificationToken;
+  }
+
   private async generateTokens(payload: ITokenPayload) {
     const accessToken = await this.getJwtAccessToken(
       payload.sub,
       payload.email,
+      payload.role,
     );
 
     const refreshToken = await this.getJwtRefreshToken(
       payload.sub,
       payload.email,
+      payload.role,
     );
 
     const hash = await argon.hash(refreshToken);
 
-    await this.prismaService.user.update({
+    await this.prismaService.users.update({
       where: {
         id: payload.sub,
       },

@@ -77,16 +77,23 @@ model posts {
 }
 
 model users {
-  id            Int     @id(map: "User_pkey") @default(autoincrement())
-  email         String  @unique(map: "User_email_key")
-  password      String?
-  name          String
-  image         String?
-  refresh_token String?
+  id             Int      @id(map: "User_pkey") @default(autoincrement())
+  email          String   @unique(map: "User_email_key")
+  password       String?
+  name           String
+  image          String?
+  refresh_token  String?
+  reset_password Boolean  @default(false)
+  role           UserRole @default(user)
 }
 
 enum AffiliateStatus {
   pending
   approved
   rejected
+}
+
+enum UserRole {
+  admin
+  user
 }

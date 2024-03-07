@@ -6,9 +6,11 @@ async function bootstrap() {
 
   //enable cors
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: `http://localhost:${process.env.CLIENT_PORT || 4200}`,
   });
 
-  await app.listen(process.env.PORT || 8001);
+  const port = process.env.PORT || 8001;
+  await app.listen(port);
+  console.log(`Auth API is running on port: ${port}`);
 }
 bootstrap();
