@@ -160,7 +160,7 @@ export class AuthService {
     }
 
     // Check if user is already logged out
-    if (!user.refresh_token) {
+    if (!user.refreshToken) {
       throw new UnauthorizedException('Unauthorized');
     }
 
@@ -171,7 +171,7 @@ export class AuthService {
           id: userId,
         },
         data: {
-          refresh_token: null,
+          refreshToken: null,
         },
       });
 
@@ -194,12 +194,12 @@ export class AuthService {
     }
 
     // Check if user is already logged out
-    if (!user.refresh_token) {
+    if (!user.refreshToken) {
       throw new UnauthorizedException('Unauthorized');
     }
 
     // Compare refresh token
-    const isMatch = await argon.verify(user.refresh_token, refreshToken);
+    const isMatch = await argon.verify(user.refreshToken, refreshToken);
 
     if (!isMatch) {
       throw new UnauthorizedException('Unauthorized');
@@ -405,7 +405,7 @@ export class AuthService {
         id: payload.sub,
       },
       data: {
-        refresh_token: hash,
+        refreshToken: hash,
       },
     });
 
