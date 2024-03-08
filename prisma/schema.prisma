@@ -16,6 +16,8 @@ model users {
   refreshToken   String?  @map("refresh_token")
   resetPassword  Boolean  @map("reset_password") @default(false) 
   role           UserRole @default(user)
+  createdAt      DateTime @map("created_at") @default(now())
+  updatedAt      DateTime @map("updated_at") @updatedAt
 }
 
 enum UserRole {
