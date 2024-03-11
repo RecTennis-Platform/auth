@@ -183,7 +183,7 @@ export class AuthService {
 
       return {
         msg: 'success',
-        data: {},
+        data: null,
       };
     } catch (err) {
       console.log('Error:', err);
@@ -264,7 +264,7 @@ export class AuthService {
 
       return {
         msg: 'success',
-        data: {},
+        data: null,
       };
     } catch (err) {
       console.log('Error:', err);
