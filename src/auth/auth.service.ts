@@ -144,14 +144,17 @@ export class AuthService {
         email: newUser.email,
         name: newUser.name,
         image: newUser.image,
-        role: user.role,
+        role: newUser.role,
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
   }
 
-  async logOut(userId: number) {
+  async logOut(userId: number): Promise<{
+    msg: string;
+    data: any;
+  }> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: userId,
@@ -178,7 +181,10 @@ export class AuthService {
         },
       });
 
-      return {};
+      return {
+        msg: 'success',
+        data: {},
+      };
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
@@ -211,7 +217,13 @@ export class AuthService {
     return await this.generateTokens(payload);
   }
 
-  async changePassword(userId: number, dto: ChangePasswordDto) {
+  async changePassword(
+    userId: number,
+    dto: ChangePasswordDto,
+  ): Promise<{
+    msg: string;
+    data: any;
+  }> {
     // Find user
     const user = await this.prismaService.users.findUnique({
       where: {
@@ -250,7 +262,10 @@ export class AuthService {
         },
       });
 
-      return {};
+      return {
+        msg: 'success',
+        data: {},
+      };
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
