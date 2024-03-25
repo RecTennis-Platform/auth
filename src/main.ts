@@ -11,6 +11,7 @@ async function bootstrap() {
 
   const port = process.env.SERVER_PORT || 8001;
   await app.listen(port);
-  console.log(`Auth API is running on port: ${port}`);
+  if (process.env.ENVIRONMENT === 'LOCAL')
+    console.log(`Auth API is running on port: ${port}`);
 }
 bootstrap();
