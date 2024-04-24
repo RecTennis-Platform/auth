@@ -16,6 +16,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
+import { Gender } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -83,6 +84,7 @@ export class AuthService {
             password: null,
             name: loginDto.name,
             image: loginDto.image,
+            gender: Gender.male,
           },
         });
       } catch (err) {
@@ -129,6 +131,7 @@ export class AuthService {
         password: hash,
         name: signUpDto.name,
         image: null,
+        gender: signUpDto.gender,
       },
     });
 
