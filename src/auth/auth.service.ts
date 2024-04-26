@@ -57,6 +57,7 @@ export class AuthService {
 
     return {
       user: {
+        id: user.id,
         email: user.email,
         name: user.name,
         image: user.image,
@@ -105,6 +106,7 @@ export class AuthService {
 
     return {
       user: {
+        id: user.id,
         email: user.email,
         name: user.name,
         image: user.image,
@@ -152,6 +154,7 @@ export class AuthService {
 
     return {
       user: {
+        id: user.id,
         email: newUser.email,
         name: newUser.name,
         image: newUser.image,

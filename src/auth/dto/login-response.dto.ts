@@ -4,6 +4,7 @@ export class LoginResponseDto {
   accessToken: string;
   refreshToken: string;
   user: {
+    id: users['id'];
     email: users['email'];
     name: users['name'];
     image: users['image'];
