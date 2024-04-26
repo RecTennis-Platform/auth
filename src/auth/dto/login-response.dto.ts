@@ -8,5 +8,8 @@ export class LoginResponseDto {
     name: users['name'];
     image: users['image'];
     role: users['role'];
+    gender: users['gender'];
+    dob: users['dob'];
+    phoneNumber: users['phoneNumber'];
   };
 }

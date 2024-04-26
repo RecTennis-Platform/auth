@@ -1,5 +1,7 @@
 import { Gender } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -22,6 +24,15 @@ export class SignUpRequestDto {
   name: string;
 
   @IsEnum(Gender)
+  @IsNotEmpty()
+  gender: Gender;
+
+  @IsString()
   @IsOptional()
-  gender?: Gender = Gender.male;
+  phoneNumber?: string;
+
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  dob?: Date;
 }

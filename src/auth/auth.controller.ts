@@ -52,6 +52,7 @@ export class AuthController {
         audience: process.env.GOOGLE_CLIENT_ID,
       });
 
+      console.log(ticket.getPayload());
       const { email, name, picture } = ticket.getPayload();
       return await this.authService.googleLogin({
         email,
