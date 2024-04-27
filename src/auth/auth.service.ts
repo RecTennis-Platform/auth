@@ -168,10 +168,7 @@ export class AuthService {
     };
   }
 
-  async logOut(userId: number): Promise<{
-    msg: string;
-    data: any;
-  }> {
+  async logOut(userId: number): Promise<any> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: userId,
@@ -198,10 +195,7 @@ export class AuthService {
         },
       });
 
-      return {
-        msg: 'success',
-        data: null,
-      };
+      return {};
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
