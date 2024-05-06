@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -17,6 +18,7 @@ import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
 import { Gender } from '@prisma/client';
+import { ResponseDto } from 'src/helper/response.dto';
 
 @Injectable()
 export class AuthService {
@@ -165,7 +167,7 @@ export class AuthService {
     };
   }
 
-  async logOut(userId: string): Promise<any> {
+  async logOut(userId: string): Promise<ResponseDto> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: userId,
@@ -192,17 +194,20 @@ export class AuthService {
         },
       });
 
-      return {
-        msg: 'success',
-        data: null,
-      };
+      return new ResponseDto(HttpStatus.OK, 'success', null);
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
     }
   }
 
-  async refresh(refreshToken: string, payload: ITokenPayload) {
+  async refresh(
+    refreshToken: string,
+    payload: ITokenPayload,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: payload.sub,
@@ -231,10 +236,7 @@ export class AuthService {
   async changePassword(
     userId: string,
     dto: ChangePasswordDto,
-  ): Promise<{
-    msg: string;
-    data: any;
-  }> {
+  ): Promise<ResponseDto> {
     // Find user
     const user = await this.prismaService.users.findUnique({
       where: {
@@ -273,10 +275,7 @@ export class AuthService {
         },
       });
 
-      return {
-        msg: 'success',
-        data: null,
-      };
+      return new ResponseDto<string>(HttpStatus.OK, 'success', null);
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
@@ -402,7 +401,10 @@ export class AuthService {
     return verificationToken;
   }
 
-  private async generateTokens(payload: ITokenPayload) {
+  private async generateTokens(payload: ITokenPayload): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const accessToken = await this.getJwtAccessToken(
       payload.sub,
       payload.email,
@@ -425,8 +427,8 @@ export class AuthService {
     });
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     };
   }
 }
