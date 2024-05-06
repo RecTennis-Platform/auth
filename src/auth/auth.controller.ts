@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpStatus,
   Post,
   Req,
   UseGuards,
@@ -35,13 +36,13 @@ const client = new OAuth2Client(
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async basicLogin(@Body() dto: BasicLoginRequestDto) {
     return await this.authService.basicLogin(dto);
   }
 
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('login/google')
   async googleLogin(
     @Body() dto: GoogleLoginRequestDto,
@@ -72,14 +73,14 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @Post('logout')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async signOut(@Req() req: IRequestWithUser) {
     const userId = req.user['sub'];
     return await this.authService.logOut(userId);
   }
 
   @UseGuards(JwtRefreshGuard)
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(@Req() req: IRequestWithUser) {
     const refreshToken = req.user['refreshToken'];
@@ -88,7 +89,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtGuard)
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('change-password')
   async changePassword(
     @Req() req: IRequestWithUser,

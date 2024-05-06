@@ -52,7 +52,6 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: user.id,
       email: user.email,
-      role: user.role,
     });
 
     return {
@@ -101,7 +100,6 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: user.id,
       email: user.email,
-      role: user.role,
     });
 
     return {
@@ -149,7 +147,6 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: newUser.id,
       email: newUser.email,
-      role: newUser.role,
     });
 
     return {
@@ -168,7 +165,7 @@ export class AuthService {
     };
   }
 
-  async logOut(userId: number): Promise<any> {
+  async logOut(userId: string): Promise<any> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: userId,
@@ -195,7 +192,10 @@ export class AuthService {
         },
       });
 
-      return {};
+      return {
+        msg: 'success',
+        data: null,
+      };
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
@@ -229,7 +229,7 @@ export class AuthService {
   }
 
   async changePassword(
-    userId: number,
+    userId: string,
     dto: ChangePasswordDto,
   ): Promise<{
     msg: string;
@@ -375,12 +375,8 @@ export class AuthService {
   // }
 
   // Utils
-  async getJwtAccessToken(
-    sub: number,
-    email: string,
-    role: string,
-  ): Promise<string> {
-    const payload: ITokenPayload = { sub, email, role };
+  async getJwtAccessToken(sub: string, email: string): Promise<string> {
+    const payload: ITokenPayload = { sub, email };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_AT_SECRET,
       expiresIn: process.env.JWT_AT_EXPIRES,
@@ -388,12 +384,8 @@ export class AuthService {
     return accessToken;
   }
 
-  async getJwtRefreshToken(
-    sub: number,
-    email: string,
-    role: string,
-  ): Promise<string> {
-    const payload: ITokenPayload = { sub, email, role };
+  async getJwtRefreshToken(sub: string, email: string): Promise<string> {
+    const payload: ITokenPayload = { sub, email };
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_RT_SECRET,
       expiresIn: process.env.JWT_RT_EXPIRES,
@@ -401,12 +393,8 @@ export class AuthService {
     return refreshToken;
   }
 
-  async getJwtVerificationToken(
-    sub: number,
-    email: string,
-    role: string,
-  ): Promise<string> {
-    const payload: ITokenPayload = { sub, email, role };
+  async getJwtVerificationToken(sub: string, email: string): Promise<string> {
+    const payload: ITokenPayload = { sub, email };
     const verificationToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_VT_SECRET,
       expiresIn: process.env.JWT_VT_EXPIRES,
@@ -418,13 +406,11 @@ export class AuthService {
     const accessToken = await this.getJwtAccessToken(
       payload.sub,
       payload.email,
-      payload.role,
     );
 
     const refreshToken = await this.getJwtRefreshToken(
       payload.sub,
       payload.email,
-      payload.role,
     );
 
     const hash = await argon.hash(refreshToken);
