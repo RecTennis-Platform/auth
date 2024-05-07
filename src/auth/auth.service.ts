@@ -18,7 +18,7 @@ import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
 import { Gender } from '@prisma/client';
-import { ResponseDto } from 'src/helper/response.dto';
+import { ResponseDto } from 'src/helper';
 
 @Injectable()
 export class AuthService {
