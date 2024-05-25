@@ -59,6 +59,7 @@ export class AuthController {
         email,
         name,
         image: picture,
+        fcmToken: dto.fcmToken,
       });
     } catch (error) {
       console.log('Error:', error.message);

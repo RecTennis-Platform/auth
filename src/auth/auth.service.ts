@@ -56,6 +56,15 @@ export class AuthService {
       email: user.email,
     });
 
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        fcmToken: loginDto.fcmToken,
+      },
+    });
+
     return {
       user: {
         id: user.id,
@@ -104,6 +113,15 @@ export class AuthService {
       email: user.email,
     });
 
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        fcmToken: loginDto.fcmToken,
+      },
+    });
+
     return {
       user: {
         id: user.id,
@@ -142,6 +160,7 @@ export class AuthService {
         gender: signUpDto.gender,
         phoneNumber: signUpDto.phoneNumber,
         dob: signUpDto.dob,
+        fcmToken: signUpDto.fcmToken,
       },
     });
 

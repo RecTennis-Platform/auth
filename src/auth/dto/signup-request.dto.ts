@@ -35,4 +35,8 @@ export class SignUpRequestDto {
   @IsOptional()
   @Type(() => Date)
   dob?: Date;
+
+  @IsString()
+  @IsOptional()
+  fcmToken?: string = null;
 }

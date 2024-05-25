@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class BasicLoginRequestDto {
   @IsEmail()
@@ -8,4 +8,8 @@ export class BasicLoginRequestDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  @IsOptional()
+  fcmToken: string = undefined;
 }

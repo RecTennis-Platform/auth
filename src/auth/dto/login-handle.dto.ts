@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class LoginHandleDto {
   @IsEmail()
@@ -12,4 +12,8 @@ export class LoginHandleDto {
   @IsString()
   @IsNotEmpty()
   image: string;
+
+  @IsString()
+  @IsOptional()
+  fcmToken: string = undefined;
 }
