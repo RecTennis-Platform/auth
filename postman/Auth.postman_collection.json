@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e72424ae-e806-411a-9c07-3ed9f2d875cd",
+		"_postman_id": "97515e2c-db13-41ac-9833-4cadfe904950",
 		"name": "Auth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-		"_exporter_id": "24188163"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24967219"
 	},
 	"item": [
 		{
@@ -16,14 +16,23 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"chihien20023@gmail.com\",\n    \"password\": \"123456789\",\n    \"name\": \"Truong Chi Hien\"\n}",
+							"raw": "{\n    \"email\": \"hqkhai1639@gmail.com\",\n    \"password\": \"KHaikajsnk123*\",\n    \"name\": \"Truong Chi Hien\",\n    \"gender\":\"male\",\n    \"fcmToken\": \"Jnkjsnaknskankjas\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/signup"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/signup",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
 					},
 					"response": [
 						{
@@ -40,7 +49,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/signup"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/signup",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
 							},
 							"status": "Bad Request",
 							"code": 400,
@@ -100,7 +118,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/signup"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/signup",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
 							},
 							"status": "Created",
 							"code": 201,
@@ -155,14 +182,23 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"chihien20022@gmail.com\",\n    \"password\": \"123456789\"\n}",
+							"raw": "{\n    \"email\": \"hqkhai1639@gmail.com\",\n    \"password\": \"KHaikajsnk123*\",\n    \"fcmToken\": \"Jnkjsnaknskankjas\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/login"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/login",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
 					},
 					"response": [
 						{
@@ -179,7 +215,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/login"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/login",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -239,7 +284,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/login"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/login",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -292,13 +346,26 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": {
-								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODg4MiwiZXhwIjoxNzEwMTMwNjgyfQ.TprUT2I4mU3uPNh7VUNdXxaKNsrM1wJEM03VHr7Ac8s"
-							}
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODg4MiwiZXhwIjoxNzEwMTMwNjgyfQ.TprUT2I4mU3uPNh7VUNdXxaKNsrM1wJEM03VHr7Ac8s",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [],
-						"url": "{{AUTH_URL}}/auth/logout"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/logout",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
 					},
 					"response": [
 						{
@@ -306,7 +373,16 @@
 							"originalRequest": {
 								"method": "POST",
 								"header": [],
-								"url": "{{AUTH_URL}}/auth/logout"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/logout",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -357,7 +433,16 @@
 							"originalRequest": {
 								"method": "POST",
 								"header": [],
-								"url": "{{AUTH_URL}}/auth/logout"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/logout",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -419,7 +504,16 @@
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/refresh"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/refresh",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
 					},
 					"response": [
 						{
@@ -436,7 +530,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/refresh"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/refresh",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -496,7 +599,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/refresh"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/refresh",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -549,9 +661,13 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": {
-								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODk2NCwiZXhwIjoxNzEwMTMwNzY0fQ.74XTmVQbIWJhErwN1vZVm5i7hnP3SfyPiy995_7Fnu0"
-							}
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODk2NCwiZXhwIjoxNzEwMTMwNzY0fQ.74XTmVQbIWJhErwN1vZVm5i7hnP3SfyPiy995_7Fnu0",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [],
@@ -564,7 +680,16 @@
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/change-password"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/change-password",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
 					},
 					"response": [
 						{
@@ -581,7 +706,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/change-password"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/change-password",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"change-password"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -641,7 +775,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/change-password"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/change-password",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"change-password"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -690,6 +833,12 @@
 					]
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "AUTH_URL",
+			"value": "http://localhost:8001"
 		}
 	]
 }
