@@ -197,21 +197,18 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Check if user is already logged out
-    if (!user.refreshToken) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
     try {
-      // Update user's refresh token to null
-      await this.prismaService.users.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          refreshToken: null,
-        },
-      });
+      if (user.refreshToken) {
+        // Update user's refresh token to null
+        await this.prismaService.users.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            refreshToken: null,
+          },
+        });
+      }
 
       return new ResponseDto(HttpStatus.OK, 'success', null);
     } catch (err) {
