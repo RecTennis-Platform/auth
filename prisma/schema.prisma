@@ -336,15 +336,16 @@ model matches {
 }
 
 model games {
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
-  is_tie_break Boolean  @default(false)
-  team_win_id  String?
-  id           Int      @id @default(autoincrement())
-  set_id       Int
-  sets         sets     @relation(fields: [set_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_games_sets")
-  teams        teams?   @relation(fields: [team_win_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_games_teams")
-  scores       scores[]
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now())
+  is_tie_break    Boolean  @default(false)
+  team_win_id     String?
+  id              Int      @id @default(autoincrement())
+  set_id          Int
+  game_start_time DateTime @default(now())
+  sets            sets     @relation(fields: [set_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_games_sets")
+  teams           teams?   @relation(fields: [team_win_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_games_teams")
+  scores          scores[]
 }
 
 model referees_tournaments {
@@ -363,7 +364,7 @@ model scores {
   type         ScoreType @default(ace)
   team_1_score Int       @default(0)
   team_2_score Int       @default(0)
-  time         DateTime  @default(now())
+  time         String?
   created_at   DateTime  @default(now())
   updated_at   DateTime  @default(now())
   team_win_id  String?
@@ -518,6 +519,7 @@ enum ScoreType {
   winner
   f_error
   unf_error
+  init
 }
 
 enum SetStatus {
