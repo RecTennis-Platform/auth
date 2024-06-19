@@ -146,6 +146,7 @@ model users {
   phoneNumber                  String?                          @map("phone_number")
   elo                          Int?
   fcmToken                     String?                          @map("fcm_token")
+  isReferee                    Boolean                          @default(false) @map("is_referee")
   groupTournamentRegistrations group_tournament_registrations[]
   matches                      matches[]
   memberShips                  member_ships[]
@@ -197,6 +198,7 @@ model tournament_registrations {
   createdAt    DateTime           @default(now()) @map("created_at")
   updatedAt    DateTime           @updatedAt @map("updated_at")
   appliedDate  DateTime?          @map("applied_date")
+  seed         Int?
   tournament   tournaments        @relation(fields: [tournamentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_tournament_registration_tournaments")
   user1        users              @relation("user1", fields: [userId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user1_tournament_registration")
   user2        users?             @relation("user2", fields: [userId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user2_tournament_registration")
@@ -289,6 +291,7 @@ model teams {
   updatedAt        DateTime        @updatedAt @map("updated_at")
   tournamentId     Int             @map("tournament_id")
   group_fixture_id String?
+  seed             Int?
   games            games[]
   matches1         matches[]       @relation("team1")
   matches2         matches[]       @relation("team2")
@@ -322,6 +325,8 @@ model matches {
   nextMatchId          String?                @map("next_match_id")
   title                String?
   referee_id           String?                @db.Uuid
+  team_1_match_score   Int                    @default(0)
+  team_2_match_score   Int                    @default(0)
   groupFixture1        group_fixtures?        @relation("groupFixture1", fields: [groupFixtureTeamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match1")
   groupFixture2        group_fixtures?        @relation("groupFixture2", fields: [groupFixtureTeamId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match2")
   team1                teams?                 @relation("team1", fields: [teamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team1")
@@ -361,9 +366,9 @@ model referees_tournaments {
 
 model scores {
   id           Int       @id @default(autoincrement())
-  type         ScoreType @default(ace)
-  team_1_score Int       @default(0)
-  team_2_score Int       @default(0)
+  type         ScoreType @default(init)
+  team_1_score String    @default("0")
+  team_2_score String    @default("0")
   time         String?
   created_at   DateTime  @default(now())
   updated_at   DateTime  @default(now())
@@ -391,14 +396,14 @@ model sets {
 }
 
 model users_follow_matches {
-  group_tournament_id String
-  user_id             String   @db.Uuid
-  created_at          DateTime @default(now())
-  updated_at          DateTime
-  matches             matches  @relation(fields: [group_tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_follow_matches")
-  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_users")
+  match_id   String
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime
+  matches    matches  @relation(fields: [match_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_follow_matches")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_users")
 
-  @@id([group_tournament_id, user_id])
+  @@id([match_id, user_id])
 }
 
 enum AffiliateStatus {

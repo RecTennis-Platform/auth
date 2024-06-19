@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -11,6 +12,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
+  EditProfileDto,
   // ForgotPasswordDto,
   GoogleLoginRequestDto,
   LoginResponseDto,
@@ -19,12 +21,9 @@ import {
 } from './dto';
 
 import { OAuth2Client } from 'google-auth-library';
+import { GetUser } from './decorators';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
-import {
-  JwtGuard,
-  JwtRefreshGuard,
-  // JwtVerifyGuard,
-} from './guards';
+import { JwtGuard, JwtRefreshGuard } from './guards';
 import { IRequestWithUser } from './interfaces';
 
 const client = new OAuth2Client(
@@ -98,6 +97,15 @@ export class AuthController {
   ) {
     const userId = req.user['sub'];
     return await this.authService.changePassword(userId, dto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch('edit-profile')
+  async editProfile(
+    @GetUser('sub') userId: string,
+    @Body() dto: EditProfileDto,
+  ) {
+    return await this.authService.editProfile(userId, dto);
   }
 
   // @HttpCode(200)
