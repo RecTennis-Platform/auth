@@ -359,40 +359,40 @@ export class AuthService {
     }
   }
 
-  // async resetPassword(userId: number, newPassword: string) {
-  //   // Find user
-  //   const user = await this.prismaService.users.findUnique({
-  //     where: {
-  //       id: userId,
-  //     },
-  //   });
+  async resetPassword(userId: string, newPassword: string) {
+    // Find user
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
-  //   if (!user) {
-  //     throw new UnauthorizedException('User not found');
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  //   if (user.reset_password == false) {
-  //     throw new UnauthorizedException(
-  //       'User has not requested for password reset',
-  //     );
-  //   }
+    if (user.resetPassword == false) {
+      throw new UnauthorizedException(
+        'User has not requested to reset password',
+      );
+    }
 
-  //   // Hash password
-  //   const hash = await argon.hash(newPassword);
+    // Hash password
+    const hash = await argon.hash(newPassword);
 
-  //   // Update user password
-  //   await this.prismaService.users.update({
-  //     where: {
-  //       id: userId,
-  //     },
-  //     data: {
-  //       password: hash,
-  //       reset_password: false,
-  //     },
-  //   });
+    // Update user password
+    await this.prismaService.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hash,
+        resetPassword: false,
+      },
+    });
 
-  //   return {};
-  // }
+    return {};
+  }
 
   // Utils
   async getJwtAccessToken(sub: string, email: string): Promise<string> {

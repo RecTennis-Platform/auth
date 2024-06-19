@@ -1,6 +1,6 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ITokenPayload } from '../interfaces/ITokenPayload';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class JwtVerifyStrategy extends PassportStrategy(
     }
 
     return {
-      payload,
+      ...payload,
     };
   }
 }
