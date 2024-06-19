@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
+  ForgotPasswordDto,
   // ForgotPasswordDto,
   GoogleLoginRequestDto,
   LoginResponseDto,
@@ -20,11 +21,7 @@ import {
 
 import { OAuth2Client } from 'google-auth-library';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
-import {
-  JwtGuard,
-  JwtRefreshGuard,
-  // JwtVerifyGuard,
-} from './guards';
+import { JwtGuard, JwtRefreshGuard } from './guards';
 import { IRequestWithUser } from './interfaces';
 
 const client = new OAuth2Client(
@@ -100,12 +97,12 @@ export class AuthController {
     return await this.authService.changePassword(userId, dto);
   }
 
-  // @HttpCode(200)
-  // @Post('forgot-password')
-  // async forgotPassword(@Body() dto: ForgotPasswordDto) {
-  //   const email = dto.email;
-  //   return await this.authService.forgotPassword(email);
-  // }
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const email = dto.email;
+    return await this.authService.forgotPassword(email);
+  }
 
   // @UseGuards(JwtVerifyGuard)
   // @HttpCode(200)

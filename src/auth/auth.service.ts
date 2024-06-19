@@ -3,28 +3,32 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as argon from 'argon2';
 
-import {
-  LoginResponseDto,
-  LoginHandleDto,
-  SignUpRequestDto,
-  ChangePasswordDto,
-} from './dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
 import { Gender } from '@prisma/client';
 import { ResponseDto } from 'src/helper';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { SendMailTemplateDto } from 'src/services/mail/mail.dto';
+import { MailService } from 'src/services/mail/mail.service';
+import {
+  ChangePasswordDto,
+  LoginHandleDto,
+  LoginResponseDto,
+  SignUpRequestDto,
+} from './dto';
+import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
+import { ITokenPayload } from './interfaces';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async basicLogin(loginDto: BasicLoginRequestDto): Promise<LoginResponseDto> {
@@ -298,61 +302,62 @@ export class AuthService {
     }
   }
 
-  // async forgotPassword(email: string) {
-  //   // Find user
-  //   const user = await this.prismaService.users.findUnique({
-  //     where: {
-  //       email,
-  //     },
-  //   });
+  async forgotPassword(email: string) {
+    // Find user
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  //   if (!user) {
-  //     throw new UnauthorizedException('Invalid email');
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  //   // Set the resetting password flag to true
-  //   await this.prismaService.users.update({
-  //     where: {
-  //       id: user.id,
-  //     },
-  //     data: {
-  //       reset_password: true,
-  //     },
-  //   });
+    // Set the resetting password flag to true
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetPassword: true,
+      },
+    });
 
-  //   // Generate token
-  //   const verificationToken = await this.getJwtVerificationToken(
-  //     user.id,
-  //     user.email,
-  //     user.role,
-  //   );
+    // Generate token
+    const verificationToken = await this.getJwtVerificationToken(
+      user.id,
+      user.email,
+    );
 
-  //   // Generate verification link
-  //   const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${verificationToken}`; // Replace with frontend url
+    // Generate verification link
+    const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${verificationToken}`; // Replace with frontend url
 
-  //   // Send verification email with token
-  //   const templateData = {
-  //     fullname: user.first_name + ' ' + user.last_name,
-  //     link: verificationLink,
-  //   };
+    // Send verification email with token
+    const templateData = {
+      fullname: user.name,
+      link: verificationLink,
+    };
 
-  //   const userEmail = user.email;
-  //   const data: SendMailTemplateDto = {
-  //     toAddresses: [userEmail],
-  //     ccAddresses: [userEmail],
-  //     bccAddresses: [userEmail],
-  //     template: 'change_password_request',
-  //     templateData: JSON.stringify(templateData),
-  //   };
+    const userEmail = user.email;
+    const data: SendMailTemplateDto = {
+      toAddresses: [userEmail],
+      ccAddresses: [userEmail],
+      bccAddresses: [userEmail],
+      template: 'change_password_request',
+      templateData: JSON.stringify(templateData),
+    };
 
-  //   try {
-  //     await this.mailService.sendEmailTemplate(data);
+    try {
+      await this.mailService.sendEmailTemplate(data);
 
-  //   return {};
-  // } catch (err) {
-  //   throw new InternalServerErrorException('Forgot password email failed to send');
-  // }
-  // }
+      return {};
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Forgot password email failed to send',
+      );
+    }
+  }
 
   // async resetPassword(userId: number, newPassword: string) {
   //   // Find user
