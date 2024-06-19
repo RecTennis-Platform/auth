@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "97515e2c-db13-41ac-9833-4cadfe904950",
+		"_postman_id": "a941be20-f062-4f54-bf72-0f5f86bfacbf",
 		"name": "Auth",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "24967219"
+		"_exporter_id": "20334878"
 	},
 	"item": [
 		{
@@ -182,7 +182,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"hqkhai1639@gmail.com\",\n    \"password\": \"KHaikajsnk123*\",\n    \"fcmToken\": \"Jnkjsnaknskankjas\"\n}",
+							"raw": "{\n    \"email\": \"tri1@gmail.com\",\n    \"password\": \"Tri0123@\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -829,6 +829,110 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"msg\": \"success\",\n    \"data\": {}\n}"
+						}
+					]
+				},
+				{
+					"name": "Edit profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNWQ5MzAzYy1jYzY0LTQ4ZjEtYjE0Zi1jYzEwZjU1MTRiNTAiLCJlbWFpbCI6InRyaTFAZ21haWwuY29tIiwiaWF0IjoxNzE4ODExMjc5LCJleHAiOjE3MjAxMDcyNzl9.GviAnYLh_bogfZZZiLgTBSr8ltKTzdX0UdWqlhG97Fs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Tri Do\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/edit-profile",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"edit-profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Edit profile",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Tri Do\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8001/auth/edit-profile",
+									"host": [
+										"localhost"
+									],
+									"port": "8001",
+									"path": [
+										"auth",
+										"edit-profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "315"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"13b-XPySLTXoxIWWuWKD08VaEhLRNr4\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 19 Jun 2024 15:45:05 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"b5d9303c-cc64-48f1-b14f-cc10f5514b50\",\n    \"email\": \"tri1@gmail.com\",\n    \"name\": \"Tri Do\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"role\": \"user\",\n    \"elo\": 200,\n    \"isReferee\": false\n}"
 						}
 					]
 				}
