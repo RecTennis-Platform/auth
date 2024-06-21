@@ -21,6 +21,7 @@
     "bootstrap": "yarn install && npx prisma db pull && npx prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.600.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
