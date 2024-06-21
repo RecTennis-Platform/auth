@@ -16,6 +16,7 @@ import { SendMailTemplateDto } from 'src/services/mail/mail.dto';
 import { MailService } from 'src/services/mail/mail.service';
 import {
   ChangePasswordDto,
+  EditProfileDto,
   LoginHandleDto,
   LoginResponseDto,
   SignUpRequestDto,
@@ -296,6 +297,61 @@ export class AuthService {
       });
 
       return new ResponseDto<string>(HttpStatus.OK, 'success', null);
+    } catch (err) {
+      console.log('Error:', err);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async editProfile(userId: string, dto: EditProfileDto) {
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isUnchanged =
+      (dto.name === undefined || dto.name === user.name) &&
+      (dto.phoneNumber === undefined || dto.phoneNumber === user.phoneNumber) &&
+      (dto.dob === undefined ||
+        new Date(dto.dob).toISOString() === user.dob.toISOString()) &&
+      (dto.gender === undefined || dto.gender === user.gender) &&
+      (dto.image === undefined || dto.image === user.image);
+
+    if (isUnchanged) {
+      throw new BadRequestException('No changes detected');
+    }
+
+    try {
+      const updatedUser = await this.prismaService.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: dto.name || user.name,
+          phoneNumber: dto.phoneNumber || user.phoneNumber,
+          dob: dto.dob ? new Date(dto.dob) : user.dob,
+          gender: dto.gender || user.gender,
+          image: dto.image || user.image,
+        },
+      });
+
+      return {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        image: updatedUser.image,
+        dob: updatedUser.dob,
+        phoneNumber: updatedUser.phoneNumber,
+        gender: updatedUser.gender,
+        role: updatedUser.role,
+        elo: updatedUser.elo,
+        isReferee: updatedUser.isReferee,
+      };
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');

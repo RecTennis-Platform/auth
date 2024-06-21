@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -11,12 +12,11 @@ import {
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
+  EditProfileDto,
   ForgotPasswordDto,
-  // ForgotPasswordDto,
   GoogleLoginRequestDto,
   LoginResponseDto,
   ResetPasswordDto,
-  // ResetPasswordDto,
   SignUpRequestDto,
 } from './dto';
 
@@ -97,6 +97,15 @@ export class AuthController {
   ) {
     const userId = req.user['sub'];
     return await this.authService.changePassword(userId, dto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch('edit-profile')
+  async editProfile(
+    @GetUser('sub') userId: string,
+    @Body() dto: EditProfileDto,
+  ) {
+    return await this.authService.editProfile(userId, dto);
   }
 
   @HttpCode(200)
