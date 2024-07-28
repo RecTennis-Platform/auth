@@ -44,19 +44,23 @@ model news {
 }
 
 model groups {
-  id                 Int                 @id @default(autoincrement())
-  name               String
-  language           String?
-  activityZone       String?             @map("activity_zone")
-  description        String?
-  status             GroupStatus         @default(active)
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  image              String?
-  purchasedPackageId String              @map("purchased_package_id")
-  maxMember          Int                 @map("max_member")
-  group_tournaments  group_tournaments[]
-  member_ships       member_ships[]
+  id                      Int                       @id @default(autoincrement())
+  name                    String
+  language                String?
+  activityZone            String?                   @map("activity_zone")
+  description             String?
+  status                  GroupStatus               @default(active)
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  image                   String?
+  purchasedPackageId      String                    @map("purchased_package_id")
+  maxMember               Int                       @map("max_member")
+  fund                    fund[]
+  group_expenses          group_expenses[]
+  group_funds             group_funds[]
+  group_tournaments       group_tournaments[]
+  member_ships            member_ships[]
+  tournament_payment_info tournament_payment_info[]
 }
 
 model posts {
@@ -67,6 +71,7 @@ model posts {
   content   String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  users     users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_post_users")
 }
 
 model packages {
@@ -147,15 +152,20 @@ model users {
   elo                          Int?
   fcmToken                     String?                          @map("fcm_token")
   isReferee                    Boolean                          @default(false) @map("is_referee")
+  advertisements               advertisements[]
   groupTournamentRegistrations group_tournament_registrations[]
   matches                      matches[]
   memberShips                  member_ships[]
+  notifications                notifications[]
   orders                       orders[]
+  posts                        posts[]
+  referees_group_tournaments   referees_group_tournaments[]
   referees_tournaments         referees_tournaments[]
   team1                        teams[]                          @relation("user1")
   team2                        teams[]                          @relation("user2")
   tournamentRegistration1      tournament_registrations[]       @relation("user1")
   tournamentRegistration2      tournament_registrations[]       @relation("user2")
+  user_group_funds             user_group_funds[]
   users_follow_matches         users_follow_matches[]
 }
 
@@ -181,9 +191,12 @@ model tournaments {
   updatedAt                DateTime                   @updatedAt @map("updated_at")
   phase                    TournamentPhase            @default(new)
   image                    String?
+  level                    Int?                       @default(1)
   fixtures                 fixtures[]
+  fund                     fund[]
   referees_tournaments     referees_tournaments[]
   teams                    teams[]
+  tournament_payment_info  tournament_payment_info[]
   tournament_registrations tournament_registrations[]
 }
 
@@ -218,8 +231,14 @@ model group_tournaments {
   address                        String
   createdAt                      DateTime                         @default(now()) @map("created_at")
   updatedAt                      DateTime                         @updatedAt @map("updated_at")
+  max_participants               Int                              @default(50)
+  fixtures                       fixtures[]
+  fund                           fund[]
   group_tournament_registrations group_tournament_registrations[]
   group                          groups                           @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_group_tournaments_groups")
+  referees_group_tournaments     referees_group_tournaments[]
+  teams                          teams[]
+  tournament_payment_info        tournament_payment_info[]
 }
 
 model group_tournament_registrations {
@@ -234,22 +253,25 @@ model group_tournament_registrations {
 }
 
 model fixtures {
-  id                   String           @id @default(uuid())
-  tournamentId         Int              @map("tournament_id")
-  numberOfParticipants Int              @map("number_of_participants")
-  fixtureStartDate     DateTime         @map("fixture_start_date")
-  fixtureEndDate       DateTime         @map("fixture_end_date")
-  status               FixtureStatus    @default(draft)
-  matchDuration        Int              @map("match_duration")
-  breakDuration        Int              @map("break_duration")
-  createdAt            DateTime         @default(now()) @map("created_at")
-  updatedAt            DateTime         @updatedAt @map("updated_at")
-  numberOfGroups       Int?             @map("number_of_groups")
-  matchesEndTime       String?          @map("matches_end_time")
-  matchesStartTime     String           @map("matches_start_time")
-  venue                String?
-  tournament           tournaments      @relation(fields: [tournamentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixtures_tournaments")
-  groupFixtures        group_fixtures[]
+  id                       String             @id @default(uuid())
+  tournamentId             Int?               @map("tournament_id")
+  numberOfParticipants     Int                @map("number_of_participants")
+  fixtureStartDate         DateTime           @map("fixture_start_date")
+  fixtureEndDate           DateTime           @map("fixture_end_date")
+  status                   FixtureStatus      @default(draft)
+  matchDuration            Int                @map("match_duration")
+  breakDuration            Int                @map("break_duration")
+  createdAt                DateTime           @default(now()) @map("created_at")
+  updatedAt                DateTime           @updatedAt @map("updated_at")
+  numberOfGroups           Int?               @map("number_of_groups")
+  matchesEndTime           String?            @map("matches_end_time")
+  matchesStartTime         String             @map("matches_start_time")
+  venue                    String?
+  group_tournament_id      Int?
+  number_of_knockout_teams Int?
+  group_tournaments        group_tournaments? @relation(fields: [group_tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixtures_group_tournaments")
+  tournament               tournaments?       @relation(fields: [tournamentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixtures_tournaments")
+  groupFixtures            group_fixtures[]
 }
 
 model group_fixtures {
@@ -281,63 +303,67 @@ model rounds {
 }
 
 model teams {
-  id               String          @id @default(uuid())
-  name             String?
-  userId1          String          @map("user_id_1") @db.Uuid
-  userId2          String?         @map("user_id_2") @db.Uuid
-  totalElo         Int?            @map("total_elo")
-  point            Int?            @default(0)
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
-  tournamentId     Int             @map("tournament_id")
-  group_fixture_id String?
-  seed             Int?
-  games            games[]
-  matches1         matches[]       @relation("team1")
-  matches2         matches[]       @relation("team2")
-  matchesWinner    matches[]       @relation("teamWinner")
-  scores           scores[]
-  sets             sets[]
-  group_fixtures   group_fixtures? @relation(fields: [group_fixture_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_teams")
-  user1            users           @relation("user1", fields: [userId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user1_teams")
-  user2            users?          @relation("user2", fields: [userId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user2_teams")
-  tournaments      tournaments     @relation(fields: [tournamentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                  String             @id @default(uuid())
+  name                String?
+  userId1             String             @map("user_id_1") @db.Uuid
+  userId2             String?            @map("user_id_2") @db.Uuid
+  totalElo            Int?               @map("total_elo")
+  point               Int?               @default(0)
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  tournamentId        Int?               @map("tournament_id")
+  group_fixture_id    String?
+  seed                Int?
+  group_tournament_id Int?
+  fund                fund[]
+  games               games[]
+  matches1            matches[]          @relation("team1")
+  matches2            matches[]          @relation("team2")
+  matchesWinner       matches[]          @relation("teamWinner")
+  scores              scores[]
+  sets                sets[]
+  group_fixtures      group_fixtures?    @relation(fields: [group_fixture_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_teams")
+  group_tournaments   group_tournaments? @relation(fields: [group_tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_teams_group_tournaments")
+  user1               users              @relation("user1", fields: [userId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user1_teams")
+  user2               users?             @relation("user2", fields: [userId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user2_teams")
+  tournaments         tournaments?       @relation(fields: [tournamentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model matches {
-  id                   String                 @id @default(uuid())
-  roundId              String                 @map("round_id")
-  groupFixtureTeamId1  String?                @map("group_fixture_team_id_1")
-  groupFixtureTeamId2  String?                @map("group_fixture_team_id_2")
-  rankGroupTeam1       Int?                   @map("rank_group_team1")
-  rankGroupTeam2       Int?                   @map("rank_group_team2")
-  teamId1              String?                @map("team_id_1")
-  teamId2              String?                @map("team_id_2")
-  teamWinnerId         String?                @map("team_winner_id")
-  matchStartDate       DateTime?              @map("match_start_date")
-  matchEndDate         DateTime?              @map("match_end_date")
-  venue                String?
-  status               MatchStatus            @default(scheduled)
-  duration             Int?
-  breakDuration        Int?                   @map("break_duration")
-  createdAt            DateTime               @default(now()) @map("created_at")
-  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
-  nextMatchId          String?                @map("next_match_id")
-  title                String?
-  referee_id           String?                @db.Uuid
-  team_1_match_score   Int                    @default(0)
-  team_2_match_score   Int                    @default(0)
-  groupFixture1        group_fixtures?        @relation("groupFixture1", fields: [groupFixtureTeamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match1")
-  groupFixture2        group_fixtures?        @relation("groupFixture2", fields: [groupFixtureTeamId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match2")
-  team1                teams?                 @relation("team1", fields: [teamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team1")
-  team2                teams?                 @relation("team2", fields: [teamId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team2")
-  teamWinner           teams?                 @relation("teamWinner", fields: [teamWinnerId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team_winner")
-  users                users?                 @relation(fields: [referee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_user")
-  nextMatch            matches?               @relation("nextMatch", fields: [nextMatchId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_next_match")
-  nextMatches          matches[]              @relation("nextMatch")
-  round                rounds                 @relation(fields: [roundId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_rounds")
-  sets                 sets[]
-  users_follow_matches users_follow_matches[]
+  id                       String                 @id @default(uuid())
+  roundId                  String                 @map("round_id")
+  groupFixtureTeamId1      String?                @map("group_fixture_team_id_1")
+  groupFixtureTeamId2      String?                @map("group_fixture_team_id_2")
+  rankGroupTeam1           Int?                   @map("rank_group_team1")
+  rankGroupTeam2           Int?                   @map("rank_group_team2")
+  teamId1                  String?                @map("team_id_1")
+  teamId2                  String?                @map("team_id_2")
+  teamWinnerId             String?                @map("team_winner_id")
+  matchStartDate           DateTime?              @map("match_start_date")
+  matchEndDate             DateTime?              @map("match_end_date")
+  venue                    String?
+  status                   MatchStatus            @default(scheduled)
+  duration                 Int?
+  breakDuration            Int?                   @map("break_duration")
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime               @default(now()) @updatedAt @map("updated_at")
+  nextMatchId              String?                @map("next_match_id")
+  title                    String?
+  referee_id               String?                @db.Uuid
+  team_1_match_score       Int                    @default(0)
+  team_2_match_score       Int                    @default(0)
+  referee_match_start_date DateTime?
+  groupFixture1            group_fixtures?        @relation("groupFixture1", fields: [groupFixtureTeamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match1")
+  groupFixture2            group_fixtures?        @relation("groupFixture2", fields: [groupFixtureTeamId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fixture_groups_match2")
+  team1                    teams?                 @relation("team1", fields: [teamId1], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team1")
+  team2                    teams?                 @relation("team2", fields: [teamId2], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team2")
+  teamWinner               teams?                 @relation("teamWinner", fields: [teamWinnerId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_team_winner")
+  users                    users?                 @relation(fields: [referee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_match_user")
+  nextMatch                matches?               @relation("nextMatch", fields: [nextMatchId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_next_match")
+  nextMatches              matches[]              @relation("nextMatch")
+  round                    rounds                 @relation(fields: [roundId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_rounds")
+  sets                     sets[]
+  users_follow_matches     users_follow_matches[]
 }
 
 model games {
@@ -365,17 +391,18 @@ model referees_tournaments {
 }
 
 model scores {
-  id           Int       @id @default(autoincrement())
-  type         ScoreType @default(init)
-  team_1_score String    @default("0")
-  team_2_score String    @default("0")
-  time         String?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @default(now())
-  team_win_id  String?
-  game_id      Int
-  games        games     @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_scores_games")
-  teams        teams?    @relation(fields: [team_win_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_scores_teams")
+  id            Int       @id @default(autoincrement())
+  type          ScoreType @default(init)
+  team_1_score  String    @default("0")
+  team_2_score  String    @default("0")
+  time          String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now())
+  team_win_id   String?
+  game_id       Int
+  team_serve_id String?
+  games         games     @relation(fields: [game_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_scores_games")
+  teams         teams?    @relation(fields: [team_win_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_scores_teams")
 }
 
 model sets {
@@ -406,6 +433,120 @@ model users_follow_matches {
   @@id([match_id, user_id])
 }
 
+model fund {
+  id                  String             @id
+  tournament_id       Int?
+  group_id            Int?
+  team_id             String
+  created_at          DateTime           @default(now())
+  updated_at          DateTime
+  status              FundStatus         @default(wait)
+  reminder_date       DateTime           @default(now())
+  due_date            DateTime           @default(now())
+  message             String?            @default("")
+  error_message       String?            @default("")
+  group_tournament_id Int?
+  groups              groups?            @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fund_group_tournaments")
+  tournaments         tournaments?       @relation(fields: [tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fund_tournaments")
+  teams               teams              @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_matches_teams")
+  group_tournaments   group_tournaments? @relation(fields: [group_tournament_id], references: [id])
+}
+
+model referees_group_tournaments {
+  group_tournament_id Int
+  referee_id          String            @db.Uuid
+  created_at          DateTime          @default(now())
+  updated_at          DateTime
+  group_tournaments   group_tournaments @relation(fields: [group_tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_referees_tournaments_group_tournaments")
+  users               users             @relation(fields: [referee_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_referees_tournaments_users")
+
+  @@id([group_tournament_id, referee_id])
+}
+
+model tournament_payment_info {
+  id                  String             @id
+  amount              Int
+  unit                String
+  payment             String
+  tournament_id       Int?
+  group_id            Int?
+  group_tournament_id Int?
+  due_date            DateTime           @default(now())
+  reminder_date       DateTime           @default(now())
+  groups              groups?            @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_payment_info_group_tournaments")
+  tournaments         tournaments?       @relation(fields: [tournament_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_payment_info_tournaments")
+  group_tournaments   group_tournaments? @relation(fields: [group_tournament_id], references: [id])
+}
+
+model advertisements {
+  id                   String              @id
+  user_id              String              @db.Uuid
+  image                String?
+  content              String
+  status               AdvertisementStatus @default(pending)
+  purchased_package_id String
+  created_at           DateTime            @default(now())
+  updated_at           DateTime
+  title                String
+  website              String?
+  users                users               @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_adv_users")
+}
+
+model group_expenses {
+  id            Int         @id @default(autoincrement())
+  group_id      Int
+  group_fund_id Int
+  type          ExpenseType
+  description   String?
+  amount        Float       @default(0)
+  categories    String
+  is_enabled    Boolean     @default(true)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now())
+  deleted_at    DateTime?
+  group_funds   group_funds @relation(fields: [group_fund_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_group_expenses_group_funds")
+  groups        groups      @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_group_expenses_groups")
+}
+
+model group_funds {
+  id               Int                @id @default(autoincrement())
+  group_id         Int
+  title            String
+  description      String?
+  amount           Float              @default(0)
+  unit             UnitCurrency
+  due_date         DateTime
+  payment_info     String
+  qr_image         String?
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @default(now())
+  group_expenses   group_expenses[]
+  groups           groups             @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_group_funds_groups")
+  user_group_funds user_group_funds[]
+}
+
+model notifications {
+  id        String   @id
+  user_id   String   @db.Uuid
+  type      String
+  data      String
+  timestamp DateTime @default(now())
+  isRead    Boolean  @default(false)
+  users     users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_notifications")
+}
+
+model user_group_funds {
+  id            Int             @id @default(autoincrement())
+  group_fund_id Int
+  user_id       String          @db.Uuid
+  status        GroupFundStatus @default(waiting)
+  description   String?
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @default(now())
+  group_funds   group_funds     @relation(fields: [group_fund_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_group_funds_group_funds")
+  users         users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_group_funds_users")
+}
+
 enum AffiliateStatus {
   pending
   approved
@@ -418,12 +559,12 @@ enum FixtureStatus {
 }
 
 enum MatchStatus {
+  walk_over
   scheduled
+  score_done
   no_party
   no_show
-  walk_over
   done
-  score_done
   skipped
 }
 
@@ -483,6 +624,7 @@ enum GroupTournamentPhase {
   generated_fixtures
   scored_matches
   completed
+  finalized_applicants
 }
 
 enum GroupTournamentFormat {
@@ -531,4 +673,34 @@ enum SetStatus {
   not_started
   on_going
   ended
+}
+
+enum FundStatus {
+  succeed
+  failed
+  pending
+  wait
+}
+
+enum AdvertisementStatus {
+  pending
+  approved
+  rejected
+}
+
+enum ExpenseType {
+  income
+  expense
+}
+
+enum GroupFundStatus {
+  waiting
+  pending
+  accepted
+  rejected
+}
+
+enum UnitCurrency {
+  VND
+  USD
 }
