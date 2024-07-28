@@ -1,28 +1,35 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as argon from 'argon2';
 
-import {
-  LoginResponseDto,
-  LoginHandleDto,
-  SignUpRequestDto,
-  ChangePasswordDto,
-} from './dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ITokenPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
 import { Gender } from '@prisma/client';
+import { ResponseDto } from 'src/helper';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { SendMailTemplateDto } from 'src/services/mail/mail.dto';
+import { MailService } from 'src/services/mail/mail.service';
+import {
+  ChangePasswordDto,
+  EditProfileDto,
+  LoginHandleDto,
+  LoginResponseDto,
+  SignUpRequestDto,
+} from './dto';
+import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
+import { ITokenPayload } from './interfaces';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async basicLogin(loginDto: BasicLoginRequestDto): Promise<LoginResponseDto> {
@@ -52,6 +59,15 @@ export class AuthService {
     const tokens = await this.generateTokens({
       sub: user.id,
       email: user.email,
+    });
+
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        fcmToken: loginDto.fcmToken,
+      },
     });
 
     return {
@@ -102,6 +118,15 @@ export class AuthService {
       email: user.email,
     });
 
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        fcmToken: loginDto.fcmToken,
+      },
+    });
+
     return {
       user: {
         id: user.id,
@@ -140,6 +165,7 @@ export class AuthService {
         gender: signUpDto.gender,
         phoneNumber: signUpDto.phoneNumber,
         dob: signUpDto.dob,
+        fcmToken: signUpDto.fcmToken,
       },
     });
 
@@ -165,7 +191,7 @@ export class AuthService {
     };
   }
 
-  async logOut(userId: string): Promise<any> {
+  async logOut(userId: string): Promise<ResponseDto> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: userId,
@@ -176,33 +202,33 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Check if user is already logged out
-    if (!user.refreshToken) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
     try {
-      // Update user's refresh token to null
-      await this.prismaService.users.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          refreshToken: null,
-        },
-      });
+      if (user.refreshToken) {
+        // Update user's refresh token to null
+        await this.prismaService.users.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            refreshToken: null,
+          },
+        });
+      }
 
-      return {
-        msg: 'success',
-        data: null,
-      };
+      return new ResponseDto(HttpStatus.OK, 'success', null);
     } catch (err) {
       console.log('Error:', err);
       throw new InternalServerErrorException('Something went wrong');
     }
   }
 
-  async refresh(refreshToken: string, payload: ITokenPayload) {
+  async refresh(
+    refreshToken: string,
+    payload: ITokenPayload,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const user = await this.prismaService.users.findUnique({
       where: {
         id: payload.sub,
@@ -231,10 +257,7 @@ export class AuthService {
   async changePassword(
     userId: string,
     dto: ChangePasswordDto,
-  ): Promise<{
-    msg: string;
-    data: any;
-  }> {
+  ): Promise<ResponseDto> {
     // Find user
     const user = await this.prismaService.users.findUnique({
       where: {
@@ -273,9 +296,61 @@ export class AuthService {
         },
       });
 
+      return new ResponseDto<string>(HttpStatus.OK, 'success', null);
+    } catch (err) {
+      console.log('Error:', err);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async editProfile(userId: string, dto: EditProfileDto) {
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isUnchanged =
+      (dto.name === undefined || dto.name === user.name) &&
+      (dto.phoneNumber === undefined || dto.phoneNumber === user.phoneNumber) &&
+      (dto.dob === undefined ||
+        new Date(dto.dob).toISOString() === user.dob.toISOString()) &&
+      (dto.gender === undefined || dto.gender === user.gender) &&
+      (dto.image === undefined || dto.image === user.image);
+
+    if (isUnchanged) {
+      throw new BadRequestException('No changes detected');
+    }
+
+    try {
+      const updatedUser = await this.prismaService.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: dto.name || user.name,
+          phoneNumber: dto.phoneNumber || user.phoneNumber,
+          dob: dto.dob ? new Date(dto.dob) : user.dob,
+          gender: dto.gender || user.gender,
+          image: dto.image || user.image,
+        },
+      });
+
       return {
-        msg: 'success',
-        data: null,
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        image: updatedUser.image,
+        dob: updatedUser.dob,
+        phoneNumber: updatedUser.phoneNumber,
+        gender: updatedUser.gender,
+        role: updatedUser.role,
+        elo: updatedUser.elo,
+        isReferee: updatedUser.isReferee,
       };
     } catch (err) {
       console.log('Error:', err);
@@ -283,96 +358,97 @@ export class AuthService {
     }
   }
 
-  // async forgotPassword(email: string) {
-  //   // Find user
-  //   const user = await this.prismaService.users.findUnique({
-  //     where: {
-  //       email,
-  //     },
-  //   });
+  async forgotPassword(email: string) {
+    // Find user
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  //   if (!user) {
-  //     throw new UnauthorizedException('Invalid email');
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  //   // Set the resetting password flag to true
-  //   await this.prismaService.users.update({
-  //     where: {
-  //       id: user.id,
-  //     },
-  //     data: {
-  //       reset_password: true,
-  //     },
-  //   });
+    // Set the resetting password flag to true
+    await this.prismaService.users.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetPassword: true,
+      },
+    });
 
-  //   // Generate token
-  //   const verificationToken = await this.getJwtVerificationToken(
-  //     user.id,
-  //     user.email,
-  //     user.role,
-  //   );
+    // Generate token
+    const verificationToken = await this.getJwtVerificationToken(
+      user.id,
+      user.email,
+    );
 
-  //   // Generate verification link
-  //   const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${verificationToken}`; // Replace with frontend url
+    // Generate verification link
+    const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${verificationToken}`; // Replace with frontend url
 
-  //   // Send verification email with token
-  //   const templateData = {
-  //     fullname: user.first_name + ' ' + user.last_name,
-  //     link: verificationLink,
-  //   };
+    // Send verification email with token
+    const templateData = {
+      fullname: user.name,
+      link: verificationLink,
+    };
 
-  //   const userEmail = user.email;
-  //   const data: SendMailTemplateDto = {
-  //     toAddresses: [userEmail],
-  //     ccAddresses: [userEmail],
-  //     bccAddresses: [userEmail],
-  //     template: 'change_password_request',
-  //     templateData: JSON.stringify(templateData),
-  //   };
+    const userEmail = user.email;
+    const data: SendMailTemplateDto = {
+      toAddresses: [userEmail],
+      ccAddresses: [userEmail],
+      bccAddresses: [userEmail],
+      template: 'change_password_request',
+      templateData: JSON.stringify(templateData),
+    };
 
-  //   try {
-  //     await this.mailService.sendEmailTemplate(data);
+    try {
+      await this.mailService.sendEmailTemplate(data);
 
-  //   return {};
-  // } catch (err) {
-  //   throw new InternalServerErrorException('Forgot password email failed to send');
-  // }
-  // }
+      return {};
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Forgot password email failed to send',
+      );
+    }
+  }
 
-  // async resetPassword(userId: number, newPassword: string) {
-  //   // Find user
-  //   const user = await this.prismaService.users.findUnique({
-  //     where: {
-  //       id: userId,
-  //     },
-  //   });
+  async resetPassword(userId: string, newPassword: string) {
+    // Find user
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
-  //   if (!user) {
-  //     throw new UnauthorizedException('User not found');
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  //   if (user.reset_password == false) {
-  //     throw new UnauthorizedException(
-  //       'User has not requested for password reset',
-  //     );
-  //   }
+    if (user.resetPassword == false) {
+      throw new UnauthorizedException(
+        'User has not requested to reset password',
+      );
+    }
 
-  //   // Hash password
-  //   const hash = await argon.hash(newPassword);
+    // Hash password
+    const hash = await argon.hash(newPassword);
 
-  //   // Update user password
-  //   await this.prismaService.users.update({
-  //     where: {
-  //       id: userId,
-  //     },
-  //     data: {
-  //       password: hash,
-  //       reset_password: false,
-  //     },
-  //   });
+    // Update user password
+    await this.prismaService.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hash,
+        resetPassword: false,
+      },
+    });
 
-  //   return {};
-  // }
+    return {};
+  }
 
   // Utils
   async getJwtAccessToken(sub: string, email: string): Promise<string> {
@@ -402,7 +478,10 @@ export class AuthService {
     return verificationToken;
   }
 
-  private async generateTokens(payload: ITokenPayload) {
+  private async generateTokens(payload: ITokenPayload): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const accessToken = await this.getJwtAccessToken(
       payload.sub,
       payload.email,
@@ -425,8 +504,8 @@ export class AuthService {
     });
 
     return {
-      accessToken,
-      refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     };
   }
 }

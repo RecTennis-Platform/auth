@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e72424ae-e806-411a-9c07-3ed9f2d875cd",
+		"_postman_id": "a941be20-f062-4f54-bf72-0f5f86bfacbf",
 		"name": "Auth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-		"_exporter_id": "24188163"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20334878"
 	},
 	"item": [
 		{
@@ -16,14 +16,23 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"chihien20023@gmail.com\",\n    \"password\": \"123456789\",\n    \"name\": \"Truong Chi Hien\"\n}",
+							"raw": "{\n    \"email\": \"hqkhai1639@gmail.com\",\n    \"password\": \"KHaikajsnk123*\",\n    \"name\": \"Truong Chi Hien\",\n    \"gender\":\"male\",\n    \"fcmToken\": \"Jnkjsnaknskankjas\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/signup"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/signup",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
 					},
 					"response": [
 						{
@@ -40,7 +49,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/signup"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/signup",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
 							},
 							"status": "Bad Request",
 							"code": 400,
@@ -100,7 +118,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/signup"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/signup",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
 							},
 							"status": "Created",
 							"code": 201,
@@ -155,14 +182,23 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"chihien20022@gmail.com\",\n    \"password\": \"123456789\"\n}",
+							"raw": "{\n    \"email\": \"tri1@gmail.com\",\n    \"password\": \"Tri0123@\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/login"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/login",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
 					},
 					"response": [
 						{
@@ -179,7 +215,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/login"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/login",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -239,7 +284,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/login"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/login",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -292,13 +346,26 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": {
-								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODg4MiwiZXhwIjoxNzEwMTMwNjgyfQ.TprUT2I4mU3uPNh7VUNdXxaKNsrM1wJEM03VHr7Ac8s"
-							}
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODg4MiwiZXhwIjoxNzEwMTMwNjgyfQ.TprUT2I4mU3uPNh7VUNdXxaKNsrM1wJEM03VHr7Ac8s",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [],
-						"url": "{{AUTH_URL}}/auth/logout"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/logout",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
 					},
 					"response": [
 						{
@@ -306,7 +373,16 @@
 							"originalRequest": {
 								"method": "POST",
 								"header": [],
-								"url": "{{AUTH_URL}}/auth/logout"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/logout",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -357,7 +433,16 @@
 							"originalRequest": {
 								"method": "POST",
 								"header": [],
-								"url": "{{AUTH_URL}}/auth/logout"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/logout",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -419,7 +504,16 @@
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/refresh"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/refresh",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
 					},
 					"response": [
 						{
@@ -436,7 +530,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/refresh"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/refresh",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -496,7 +599,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/refresh"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/refresh",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"refresh"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -549,9 +661,13 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": {
-								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODk2NCwiZXhwIjoxNzEwMTMwNzY0fQ.74XTmVQbIWJhErwN1vZVm5i7hnP3SfyPiy995_7Fnu0"
-							}
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2hpaGllbjIwMDIyQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxMDEyODk2NCwiZXhwIjoxNzEwMTMwNzY0fQ.74XTmVQbIWJhErwN1vZVm5i7hnP3SfyPiy995_7Fnu0",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [],
@@ -564,7 +680,16 @@
 								}
 							}
 						},
-						"url": "{{AUTH_URL}}/auth/change-password"
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/change-password",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
 					},
 					"response": [
 						{
@@ -581,7 +706,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/change-password"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/change-password",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"change-password"
+									]
+								}
 							},
 							"status": "Unauthorized",
 							"code": 401,
@@ -641,7 +775,16 @@
 										}
 									}
 								},
-								"url": "{{AUTH_URL}}/auth/change-password"
+								"url": {
+									"raw": "{{AUTH_URL}}/auth/change-password",
+									"host": [
+										"{{AUTH_URL}}"
+									],
+									"path": [
+										"auth",
+										"change-password"
+									]
+								}
 							},
 							"status": "OK",
 							"code": 200,
@@ -688,8 +831,118 @@
 							"body": "{\n    \"msg\": \"success\",\n    \"data\": {}\n}"
 						}
 					]
+				},
+				{
+					"name": "Edit profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNWQ5MzAzYy1jYzY0LTQ4ZjEtYjE0Zi1jYzEwZjU1MTRiNTAiLCJlbWFpbCI6InRyaTFAZ21haWwuY29tIiwiaWF0IjoxNzE4ODExMjc5LCJleHAiOjE3MjAxMDcyNzl9.GviAnYLh_bogfZZZiLgTBSr8ltKTzdX0UdWqlhG97Fs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Tri Do\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{AUTH_URL}}/auth/edit-profile",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"auth",
+								"edit-profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Edit profile",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Tri Do\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8001/auth/edit-profile",
+									"host": [
+										"localhost"
+									],
+									"port": "8001",
+									"path": [
+										"auth",
+										"edit-profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "315"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"13b-XPySLTXoxIWWuWKD08VaEhLRNr4\""
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 19 Jun 2024 15:45:05 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"b5d9303c-cc64-48f1-b14f-cc10f5514b50\",\n    \"email\": \"tri1@gmail.com\",\n    \"name\": \"Tri Do\",\n    \"image\": \"https://lh3.googleusercontent.com/a/ACg8ocJ5fXYZ6d74iUT0d6j6RrWvdc0_bkSkXWqRMqDW4GeOJcwGfw4p=s96-c\",\n    \"dob\": \"2003-10-24T09:17:46.000Z\",\n    \"phoneNumber\": \"0123123123\",\n    \"gender\": \"female\",\n    \"role\": \"user\",\n    \"elo\": 200,\n    \"isReferee\": false\n}"
+						}
+					]
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "AUTH_URL",
+			"value": "http://localhost:8001"
 		}
 	]
 }

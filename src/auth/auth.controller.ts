@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -11,20 +12,18 @@ import {
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
-  // ForgotPasswordDto,
+  EditProfileDto,
+  ForgotPasswordDto,
   GoogleLoginRequestDto,
   LoginResponseDto,
-  // ResetPasswordDto,
+  ResetPasswordDto,
   SignUpRequestDto,
 } from './dto';
 
 import { OAuth2Client } from 'google-auth-library';
+import { GetUser } from './decorators';
 import { BasicLoginRequestDto } from './dto/basic-login-request.dto';
-import {
-  JwtGuard,
-  JwtRefreshGuard,
-  // JwtVerifyGuard,
-} from './guards';
+import { JwtGuard, JwtRefreshGuard, JwtVerifyGuard } from './guards';
 import { IRequestWithUser } from './interfaces';
 
 const client = new OAuth2Client(
@@ -59,6 +58,7 @@ export class AuthController {
         email,
         name,
         image: picture,
+        fcmToken: dto.fcmToken,
       });
     } catch (error) {
       console.log('Error:', error.message);
@@ -99,24 +99,29 @@ export class AuthController {
     return await this.authService.changePassword(userId, dto);
   }
 
-  // @HttpCode(200)
-  // @Post('forgot-password')
-  // async forgotPassword(@Body() dto: ForgotPasswordDto) {
-  //   const email = dto.email;
-  //   return await this.authService.forgotPassword(email);
-  // }
+  @UseGuards(JwtGuard)
+  @Patch('edit-profile')
+  async editProfile(
+    @GetUser('sub') userId: string,
+    @Body() dto: EditProfileDto,
+  ) {
+    return await this.authService.editProfile(userId, dto);
+  }
 
-  // @UseGuards(JwtVerifyGuard)
-  // @HttpCode(200)
-  // @Post('reset-password')
-  // async resetPassword(
-  //   @Req() req: IRequestWithUser,
-  //   @Body() dto: ResetPasswordDto,
-  // ) {
-  //   const payload = req.user['payload'];
-  //   return await this.authService.resetPassword(
-  //     payload['sub'],
-  //     dto.newPassword,
-  //   );
-  // }
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const email = dto.email;
+    return await this.authService.forgotPassword(email);
+  }
+
+  @UseGuards(JwtVerifyGuard)
+  @HttpCode(200)
+  @Post('reset-password')
+  async resetPassword(
+    @GetUser('sub') userId: string,
+    @Body() dto: ResetPasswordDto,
+  ) {
+    return await this.authService.resetPassword(userId, dto.newPassword);
+  }
 }
