@@ -1,6 +1,6 @@
 # PROJECT: TENITY
 
-A brief description of what the API server does. Component: AUTH
+The Authentication (AUTH) component of the API server is responsible for managing user authentication and authorization. It ensures secure access to the system by validating user credentials, issuing authentication tokens, and enforcing access controls.
 
 ## Table of Contents
 
@@ -25,6 +25,7 @@ List of software and tools required:
 2. Navigate to the project directory:
 3. Install dependencies:
    ```bash
+   $ npx prisma db push
    $ yarn bootstrap
    ```
 
